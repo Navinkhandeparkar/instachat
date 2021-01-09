@@ -1,4 +1,3 @@
-require("dotenv").config();
 import logo from "./logo.svg";
 import React, { useRef, useState } from "react";
 import "./App.css";
@@ -10,25 +9,31 @@ import "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
+require("dotenv").config();
+
 firebase.initializeApp({
-  apiKey: process.env.apiKey,
-  authDomain: process.env.authDomain,
-  projectId: process.env.projectId,
-  storageBucket: process.env.storageBucket,
-  messagingSenderId: process.env.messagingSenderId,
-  appId: process.env.appId,
-  measurementId: process.env.measurementId,
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTHDOMAIN,
+  projectId: process.env.REACT_APP_PROJECTID,
+  storageBucket: process.env.REACT_APP_STORAGEBUCKET,
+  messagingSenderId: process.env.REACT_APP_MSGSENDERID,
+  appId: process.env.REACT_APP_APPID,
+  measurementId: process.env.REACT_APP_MESID,
 });
 
 const auth = firebase.auth();
 const firestore = firebase.firestore();
+// const analytics = firebase.analytics();
 
 function App() {
   const [user] = useAuthState(auth);
 
   return (
     <div className="App">
-      <header className="App-header"></header>
+      <header>
+        <h1>Instachat💬</h1>
+        <SignOut />
+      </header>
 
       <section>{user ? <ChatRoom /> : <SignIn />}</section>
     </div>
@@ -36,33 +41,37 @@ function App() {
 }
 
 function SignIn() {
-  // const usersRef = firestore.collection("users");
-
-  const SignInWithGoogle = () => {
+  const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider);
-
-    // if (auth.currentUser) {
-    //   usersRef.doc(auth.currentUser.uid).add({
-    //     id: auth.currentUser.uid,
-    //     photoURL: auth.currentUser.photoURL,
-    //     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    //   });
-    // }
   };
-  return <button onClick={SignInWithGoogle}> Sign in with Google</button>;
+
+  return (
+    <>
+      <button className="sign-in" onClick={signInWithGoogle}>
+        Sign in with Google
+      </button>
+      <p>
+        Do not violate the community guidelines or you will be banned for life!
+      </p>
+    </>
+  );
 }
 
 function SignOut() {
   return (
-    auth.currentUser && <button onClick={() => auth.signOut()}>sign out</button>
+    auth.currentUser && (
+      <button className="sign-out" onClick={() => auth.signOut()}>
+        Sign Out
+      </button>
+    )
   );
 }
 
 function ChatRoom() {
   const dummy = useRef();
   const messagesRef = firestore.collection("messages");
-  const query = messagesRef.orderBy("createdAt").limit(25);
+  const query = messagesRef.orderBy("createdAt").limit(100);
 
   const [messages] = useCollectionData(query, { idField: "id" });
 
@@ -90,15 +99,19 @@ function ChatRoom() {
         {messages &&
           messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
 
-        <div ref={dummy}></div>
+        <span ref={dummy}></span>
       </main>
 
       <form onSubmit={sendMessage}>
         <input
           value={formValue}
           onChange={(e) => setFormValue(e.target.value)}
+          placeholder="say something nice"
         />
-        <button type="submit">Send</button>
+
+        <button type="submit" disabled={!formValue}>
+          🕊️
+        </button>
       </form>
     </>
   );
@@ -110,10 +123,16 @@ function ChatMessage(props) {
   const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
 
   return (
-    <div className={"message ${messageClass}"}>
-      <img src={photoURL} />
-      <p>{text}</p>
-    </div>
+    <>
+      <div className={`message ${messageClass}`}>
+        <img
+          src={
+            photoURL || "https://api.adorable.io/avatars/23/abott@adorable.png"
+          }
+        />
+        <p>{text}</p>
+      </div>
+    </>
   );
 }
 
