@@ -43,7 +43,50 @@ function App() {
 function SignIn() {
   const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider);
+    auth
+      .signInWithPopup(provider)
+      .then((result) => {
+        /** @type {firebase.auth.OAuthCredential} */
+        var credential = result.credential;
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        var token = credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        // ...
+        console.log(user.uid);
+        console.log(user.photoURL);
+        console.log(user.displayName);
+        console.log(user.email);
+        console.log(user.phoneNumber);
+
+        firestore
+          .collection("users")
+          .doc(user.uid)
+          .set({
+            photoURL: user.photoURL,
+            name: user.displayName,
+            email: user.email,
+            uid: user.uid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          })
+          .then(function () {
+            console.log("Document successfully written!");
+          })
+          .catch(function (error) {
+            console.error("Error writing document: ", error);
+          });
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        // ...
+        console.log(error.message);
+      });
   };
 
   return (
