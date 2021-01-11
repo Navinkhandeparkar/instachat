@@ -21,7 +21,7 @@ To install your packages
 Firebase configs are added in .env file.
 Create .env file in root folder and add your configs. (I've added .env.example file for reference)
 
-Cloud functions are stored in /public directory. Currently it contains bad word detector function.
+Cloud functions are stored in /functions directory. Currently it contains bad word detector function.
 
 Use this to deploy your functions:
 
