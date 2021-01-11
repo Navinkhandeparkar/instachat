@@ -27,7 +27,7 @@ Use this to deploy your functions:
 
 ### `firebase deploy --only functions`
 
-## bad word detector
+# Bad word detector
 
 1. Check the text for any bad words.
 2. warning is given 3 times, after that user is blocked for lifetime.
